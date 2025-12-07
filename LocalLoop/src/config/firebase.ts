@@ -7,6 +7,9 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
+
+
+
 const firebaseConfig = {
     apiKey: "AIzaSyBWBc4M-v8F744Fq8ptOeGDY5Ws0kK1VKk",
     authDomain: "localloop-42221.firebaseapp.com",

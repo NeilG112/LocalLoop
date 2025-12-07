@@ -190,10 +190,11 @@ export function useMatches(userId: string | undefined) {
             return;
         }
 
+        // Note: Removed orderBy to avoid needing a composite index
+        // We'll sort client-side instead
         const matchesQuery = query(
             collection(db, 'matches'),
-            where('users', 'array-contains', userId),
-            orderBy('lastMessageAt', 'desc')
+            where('users', 'array-contains', userId)
         );
 
         const unsubscribe = onSnapshot(matchesQuery, async (snapshot) => {
@@ -223,6 +224,13 @@ export function useMatches(userId: string | undefined) {
                     }
                 }
             }
+
+            // Sort client-side by lastMessageAt (most recent first)
+            matchesList.sort((a, b) => {
+                const timeA = a.lastMessageAt?.getTime() || a.createdAt.getTime();
+                const timeB = b.lastMessageAt?.getTime() || b.createdAt.getTime();
+                return timeB - timeA; // Descending order
+            });
 
             setMatches(matchesList);
             setMatchedUsers(usersMap);

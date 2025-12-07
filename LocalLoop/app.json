@@ -38,6 +38,20 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "LocalLoop needs your location to find people nearby.",
+          "locationWhenInUsePermission": "LocalLoop needs your location to find people nearby."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "LocalLoop needs access to your photos to add profile pictures.",
+          "cameraPermission": "LocalLoop needs access to your camera to take profile pictures."
+        }
       ]
     ],
     "experiments": {

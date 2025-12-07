@@ -1,2 +1,399 @@
-1. this is a test
+.
+
+📘 LocalLoop – Full App Specification (MVP)
+
+Version: 1.0
+Author: Neil
+Purpose: Provide a complete technical and functional blueprint for Cursor to implement the app.
+
+1. APP SUMMARY
+
+LocalLoop is a swipe-based cultural exchange platform connecting Visitors (travelers) with Hosts (locals).
+Users can be both, but only see profiles of the opposite tag:
+
+Visitors see Hosts
+
+Hosts see Visitors
+
+Users swipe on profiles.
+If one user likes another, and the second user rejects, they still get a notification showing:
+
+“This user liked you — like back?”
+
+A match occurs when both users like each other.
+
+Users can filter by age, gender, distance radius, language, and more.
+
+The MVP includes full profile creation, browsing, swipe mechanics, matching, and chat (text + emojis).
+
+2. USER ROLES
+2.1 Role Types
+
+Host
+
+Visitor
+
+2.2 Role Logic
+
+User chooses role at signup (Host or Visitor)
+
+User can switch roles anytime in Settings
+
+Host sees only Visitors
+
+Visitor sees only Hosts
+
+This logic must apply everywhere: swiping, discovery, matches, etc.
+
+3. PROFILE SYSTEM
+3.1 Profile Fields
+
+Each user profile contains all of the following:
+
+id (string)
+name (string)
+age (number)
+gender (string: male, female, other)
+bio (string)
+languages (array of strings)
+interests (array of strings)
+photos (array of URIs)
+role (string: "host" or "visitor")
+location: {
+  country (string)
+  city (string)
+  coordinates: { lat: number, lng: number }
+}
+radius_preference (number, km)
+gender_preference (string: any/male/female/other)
+age_preference: { min: number, max: number }
+createdAt (timestamp)
+updatedAt (timestamp)
+
+4. FILTER SYSTEM
+
+Filters must be applied server-side or Firestore query-based to reduce cost.
+
+Users can filter by:
+
+Age range
+
+Gender
+
+Distance radius
+
+Languages
+
+Interests
+
+Whether the other person has liked them (optional visual indicator)
+
+5. SWIPE SYSTEM
+5.1 Swipe Actions
+
+Users can:
+
+Swipe right → LIKE
+
+Swipe left → DISLIKE
+
+5.2 Required Firestore Structure
+
+Collection: swipes
+
+Each swipe:
+
+{
+  from: userId,
+  to: userId,
+  type: "like" | "dislike",
+  timestamp: ...
+}
+
+6. MATCHING LOGIC (IMPORTANT)
+6.1 When User A likes User B
+
+Check if B has liked A:
+
+If YES → CREATE MATCH
+
+If NO → store swipe only
+
+6.2 When User B dislikes A
+
+The system must still check:
+
+Has A liked B already?
+
+If YES →
+Show B an indicator:
+
+“This user liked you — like back?”
+
+If B chooses to like anyway → create match.
+
+7. MATCHES
+7.1 Firestore Structure
+
+Collection: matches
+
+{
+  id: auto-id,
+  users: [userAId, userBId],
+  createdAt: timestamp,
+  lastMessage: string,
+  lastMessageAt: timestamp
+}
+
+
+Matches generate chats.
+
+8. CHAT SYSTEM
+8.1 MVP Features
+
+Text messages
+
+Emojis
+
+(No images for MVP)
+
+8.2 Firestore Structure
+
+Collection: matches/{matchId}/messages
+
+{
+  senderId: string,
+  text: string,
+  createdAt: timestamp
+}
+
+
+Chats appear under a “Messages” tab.
+
+9. ONBOARDING FLOW
+
+Start screen
+
+Phone/email signup (Firebase Auth)
+
+Choose role → Host or Visitor
+
+Create profile:
+
+Name
+
+Age
+
+Photos
+
+Bio
+
+Gender
+
+Languages
+
+Interests
+
+City & location permission
+
+Preferences (age, gender, distance)
+
+Start swiping screen.
+
+10. NAVIGATION STRUCTURE
+
+Use React Navigation Native Stack + Tabs.
+
+Tabs
+Home (Swiping)
+Matches
+Profile
+Settings
+
+Navigation Map
+App
+ ├── AuthStack
+ │     ├── LoginScreen
+ │     ├── SignupScreen
+ │     └── RoleSelectScreen
+ │
+ └── MainTabs
+       ├── HomeScreen (swipe)
+       ├── MatchListScreen
+       ├── ChatScreen
+       ├── ProfileScreen
+       └── SettingsScreen
+
+11. HOMESCREEN (SWIPE VIEW)
+UI Requirements
+
+Tinder-style card stack
+
+Shows:
+
+Name
+
+Age
+
+Photos
+
+Languages
+
+Interests
+
+Bio
+
+Distance
+
+Tag (Host/Visitor)
+
+Buttons:
+
+X → Dislike
+
+Star (optional)
+
+Heart → Like
+
+Swiping logic:
+
+Fetch next 20 eligible users (opposite role)
+
+Apply filters
+
+Exclude:
+
+Already liked
+
+Already disliked
+
+Already matched
+
+12. BACKEND RULES
+Firestore Security Rules
+
+Users can edit only their own profile
+
+Users can write only swipes they initiated
+
+Users can read only matches they are part of
+
+Users can read messages only in matches they are part of
+
+13. SETTINGS
+MVP Settings
+
+Switch role: Host ↔ Visitor
+
+Edit preferences
+
+Edit filters
+
+Change profile info
+
+Logout
+
+Block users
+
+Delete account
+
+14. ROLE SWITCHING
+When user switches role:
+
+Clear swiping queue
+
+Reload profile feed with opposite role
+
+No need to remove existing matches
+
+Matches stay active.
+
+15. DESIGN REQUIREMENTS
+Color Palette
+
+White / light grey background
+
+Accent color: blue (#3C82F6)
+
+Secondary: green (#38D39F)
+
+Soft shadows
+
+Rounded corners (16–24px)
+
+Typography
+
+San Francisco / Inter
+
+Big headers
+
+Clean spacing
+
+16. MVP DEVELOPMENT PRIORITIES
+1. Core Authentication
+2. Profile Creation
+3. Swipe Engine
+4. Matching Logic
+5. Chat
+6. Filters
+7. Profile Editing
+8. Settings
+17. WHAT NOT TO BUILD YET
+
+Plans / Events
+
+Advanced verification
+
+Photo-sharing in chat
+
+Video chat
+
+In-app currency
+
+Groups
+
+Feed/posts
+
+These come after MVP is stable.
+
+18. FIRESTORE STRUCTURE (FULL)
+/users/{userId}
+/swipes/{swipeId}
+/matches/{matchId}
+/matches/{matchId}/messages/{messageId}
+
+19. LOCATION HANDLING
+
+Use Expo Location or React Native Location:
+
+Request permission
+
+Store lat/lng in profile
+
+Calculate distance using haversine formula
+
+Filter feed by user radius preference
+
+20. TECHNICAL REFINEMENTS & ADDITIONS (PROPOSED)
+
+20.1 Storage (Firebase Storage)
+Path: /users/{userId}/profile_images/{imageId}.jpg
+Logic: Compressing images on client before upload to save bandwidth.
+
+20.2 Geolocation Strategy
+To efficiently query "users within X radius" without downloading the entire database:
+- Use Geohashes (via `geofire-common` library).
+- Store `geohash` and `lat/lng` in the user profile.
+- Query Firestore by matching geohash prefixes + client-side distance filtering.
+
+20.3 Notifications (Expo Notifications)
+Triggers:
+- New Match ("You have a new match!")
+- New Message ("User sent a message")
+Firestore: Store push tokens in `/users/{userId}/push_tokens`.
+
+20.4 Safety
+- Report Collection: /reports/{reportId} { reporterId, reportedId, reason, timestamp }
+- Block List: Store in user profile or subcollection `blocked_users`. Exclude from feed queries.
+
 

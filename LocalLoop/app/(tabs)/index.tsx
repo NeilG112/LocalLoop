@@ -10,6 +10,7 @@ import {
     ActivityIndicator,
     Animated,
     PanResponder,
+    Alert,
 } from 'react-native';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useSwipeablUsers, useSwipes } from '../../src/hooks/useFirestore';
@@ -73,26 +74,51 @@ export default function HomeScreen() {
             toValue: { x, y: 0 },
             duration: 250,
             useNativeDriver: false,
-        }).start(() => {
-            position.setValue({ x: 0, y: 0 });
-            setCurrentIndex(prev => prev + 1);
-        });
+        }).start();
     };
 
     const swipeRight = async () => {
-        if (!currentUser) return;
-        swipeOut('right');
-        const result = await recordSwipe(currentUser.id, 'like');
-        if (result.matched) {
-            // TODO: Show match animation
-            console.log('Match created!', result.matchId);
+        if (!currentUser || swipeLoading) return;
+
+        try {
+            swipeOut('right');
+            const result = await recordSwipe(currentUser.id, 'like');
+
+            // Wait for animation to complete before advancing
+            setTimeout(() => {
+                position.setValue({ x: 0, y: 0 });
+                setCurrentIndex(prev => prev + 1);
+            }, 250);
+
+            if (result.matched) {
+                // TODO: Show match animation
+                console.log('Match created!', result.matchId);
+                Alert.alert('🎉 It\'s a Match!', 'You both liked each other!');
+            }
+        } catch (error) {
+            console.error('Error recording swipe:', error);
+            Alert.alert('Error', 'Failed to record swipe. Please try again.');
+            resetPosition();
         }
     };
 
     const swipeLeft = async () => {
-        if (!currentUser) return;
-        swipeOut('left');
-        await recordSwipe(currentUser.id, 'dislike');
+        if (!currentUser || swipeLoading) return;
+
+        try {
+            swipeOut('left');
+            await recordSwipe(currentUser.id, 'dislike');
+
+            // Wait for animation to complete before advancing
+            setTimeout(() => {
+                position.setValue({ x: 0, y: 0 });
+                setCurrentIndex(prev => prev + 1);
+            }, 250);
+        } catch (error) {
+            console.error('Error recording swipe:', error);
+            Alert.alert('Error', 'Failed to record swipe. Please try again.');
+            resetPosition();
+        }
     };
 
     const getCardStyle = () => {

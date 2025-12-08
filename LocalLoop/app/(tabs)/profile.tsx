@@ -34,7 +34,7 @@ export default function ProfileScreen() {
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>My Profile</Text>
-                <TouchableOpacity onPress={() => router.push('/settings')}>
+                <TouchableOpacity onPress={() => router.push('/edit-profile')}>
                     <Text style={styles.editButton}>Edit</Text>
                 </TouchableOpacity>
             </View>

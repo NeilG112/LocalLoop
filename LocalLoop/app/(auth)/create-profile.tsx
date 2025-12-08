@@ -15,10 +15,10 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../src/contexts/AuthContext';
-import { useLocation } from '../../src/hooks/useLocation';
+import { LocationPicker } from '../../src/components/LocationPicker';
 import { Button, Input, Badge } from '../../src/components/ui';
 import { colors, typography, spacing, borderRadius, shadows } from '../../src/config/theme';
-import { Gender, UserRole, CreateUserData } from '../../src/types';
+import { Gender, UserRole, CreateUserData, Location as UserLocation } from '../../src/types';
 
 const LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Chinese', 'Japanese', 'Korean', 'Arabic', 'Hindi', 'Russian'];
 const INTERESTS = ['Art', 'Music', 'Food', 'Sports', 'Travel', 'History', 'Nature', 'Photography', 'Movies', 'Tech', 'Fashion', 'Nightlife'];
@@ -27,7 +27,6 @@ export default function CreateProfileScreen() {
     const router = useRouter();
     const params = useLocalSearchParams<{ userId: string; role: UserRole }>();
     const { createUserProfile, firebaseUser, isLoading } = useAuth();
-    const { getLocationWithGeohash, loading: locationLoading } = useLocation();
 
     const [step, setStep] = useState(1);
     const [name, setName] = useState('');
@@ -37,6 +36,7 @@ export default function CreateProfileScreen() {
     const [photos, setPhotos] = useState<string[]>([]);
     const [languages, setLanguages] = useState<string[]>([]);
     const [interests, setInterests] = useState<string[]>([]);
+    const [location, setLocation] = useState<UserLocation | null>(null);
 
     const toggleLanguage = (lang: string) => {
         setLanguages(prev =>
@@ -73,17 +73,12 @@ export default function CreateProfileScreen() {
 
     const handleComplete = async () => {
         const userId = params.userId || firebaseUser?.uid;
-        if (!userId || !gender) return;
+        if (!userId || !gender || !location) {
+            Alert.alert('Missing Information', 'Please complete all required fields including location.');
+            return;
+        }
 
         try {
-            // Get location
-            const location = await getLocationWithGeohash();
-
-            if (!location) {
-                Alert.alert('Location Required', 'Please enable location services to continue.');
-                return;
-            }
-
             const profileData: CreateUserData = {
                 email: firebaseUser?.email || '',
                 name: name.trim(),
@@ -116,6 +111,7 @@ export default function CreateProfileScreen() {
             case 3: return photos.length >= 1;
             case 4: return languages.length >= 1;
             case 5: return interests.length >= 1;
+            case 6: return location !== null;
             default: return false;
         }
     };
@@ -250,6 +246,20 @@ export default function CreateProfileScreen() {
                     </View>
                 );
 
+            case 6:
+                return (
+                    <View style={styles.stepContent}>
+                        <Text style={styles.stepTitle}>Your Location</Text>
+                        <Text style={styles.stepSubtitle}>
+                            We'll use this to show you people nearby
+                        </Text>
+                        <LocationPicker
+                            onLocationSelected={setLocation}
+                            initialLocation={location || undefined}
+                        />
+                    </View>
+                );
+
             default:
                 return null;
         }
@@ -262,7 +272,7 @@ export default function CreateProfileScreen() {
         >
             {/* Progress Bar */}
             <View style={styles.progressContainer}>
-                {[1, 2, 3, 4, 5].map((s) => (
+                {[1, 2, 3, 4, 5, 6].map((s) => (
                     <View
                         key={s}
                         style={[styles.progressStep, s <= step && styles.progressStepActive]}
@@ -287,7 +297,7 @@ export default function CreateProfileScreen() {
                         style={styles.navButton}
                     />
                 )}
-                {step < 5 ? (
+                {step < 6 ? (
                     <Button
                         title="Continue"
                         onPress={() => setStep(step + 1)}
@@ -298,7 +308,7 @@ export default function CreateProfileScreen() {
                     <Button
                         title="Complete Profile"
                         onPress={handleComplete}
-                        loading={isLoading || locationLoading}
+                        loading={isLoading}
                         disabled={!canContinue()}
                         style={styles.navButton}
                     />

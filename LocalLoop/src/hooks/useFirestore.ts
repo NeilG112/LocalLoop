@@ -78,10 +78,10 @@ export function useSwipeablUsers(
             // Filter and transform users
             const fetchedUsers: User[] = [];
 
-            // Use provided filters or fallback to user preferences
-            const activeAgeRange = filters?.ageRange || currentUser.preferences.agePreference;
-            const activeGenderPref = filters?.gender || currentUser.preferences.genderPreference;
-            const activeMaxDistance = filters?.maxDistance || currentUser.preferences.radiusPreference;
+            // Use provided filters or fallback to user preferences (with safe defaults)
+            const activeAgeRange = filters?.ageRange || currentUser.preferences?.agePreference || { min: 18, max: 99 };
+            const activeGenderPref = filters?.gender || currentUser.preferences?.genderPreference || 'any';
+            const activeMaxDistance = filters?.maxDistance || currentUser.preferences?.radiusPreference || 50;
             const activeLanguages = filters?.languages || [];
 
             snapshot.docs.forEach(doc => {

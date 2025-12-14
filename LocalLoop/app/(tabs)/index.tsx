@@ -32,9 +32,9 @@ export default function HomeScreen() {
     React.useEffect(() => {
         if (user && !activeFilters) {
             setActiveFilters({
-                ageRange: user.preferences.agePreference,
-                maxDistance: user.preferences.radiusPreference,
-                gender: user.preferences.genderPreference,
+                ageRange: user.preferences?.agePreference || { min: 18, max: 99 },
+                maxDistance: user.preferences?.radiusPreference || 50,
+                gender: user.preferences?.genderPreference || 'any',
                 languages: [],
             });
         }

@@ -85,13 +85,27 @@ export function ProfileCard({ user, distance, isCurrentUser = false }: ProfileCa
                     <Text style={styles.bio}>{user.bio || 'No bio yet'}</Text>
                 </View>
 
-                {/* Languages */}
+                {/* Languages Spoken */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>🗣️ Languages</Text>
+                    <Text style={styles.sectionTitle}>🗣️ Languages I Speak</Text>
                     <View style={styles.tags}>
-                        {user.languages.length > 0 ? (
-                            user.languages.map((lang, index) => (
-                                <Badge key={index} label={lang} variant="primary" />
+                        {user.languagesSpoken.length > 0 ? (
+                            user.languagesSpoken.map((lang, index) => (
+                                <Badge key={index} label={`${lang.language} (${lang.level})`} variant="primary" />
+                            ))
+                        ) : (
+                            <Text style={styles.empty}>No languages specified</Text>
+                        )}
+                    </View>
+                </View>
+
+                {/* Languages to Learn */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>📚 Languages to Learn</Text>
+                    <View style={styles.tags}>
+                        {user.languagesToLearn.length > 0 ? (
+                            user.languagesToLearn.map((lang, index) => (
+                                <Badge key={index} label={`${lang.language} (${lang.level})`} variant="secondary" />
                             ))
                         ) : (
                             <Text style={styles.empty}>No languages specified</Text>

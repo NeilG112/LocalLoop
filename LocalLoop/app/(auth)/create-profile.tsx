@@ -16,11 +16,11 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { LocationPicker } from '../../src/components/LocationPicker';
+import { LanguageSelector } from '../../src/components/LanguageSelector';
 import { Button, Input, Badge } from '../../src/components/ui';
 import { colors, typography, spacing, borderRadius, shadows } from '../../src/config/theme';
-import { Gender, UserRole, CreateUserData, Location as UserLocation } from '../../src/types';
+import { Gender, UserRole, CreateUserData, Location as UserLocation, LanguageWithLevel } from '../../src/types';
 
-const LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Chinese', 'Japanese', 'Korean', 'Arabic', 'Hindi', 'Russian'];
 const INTERESTS = ['Art', 'Music', 'Food', 'Sports', 'Travel', 'History', 'Nature', 'Photography', 'Movies', 'Tech', 'Fashion', 'Nightlife'];
 
 export default function CreateProfileScreen() {
@@ -34,17 +34,10 @@ export default function CreateProfileScreen() {
     const [gender, setGender] = useState<Gender | null>(null);
     const [bio, setBio] = useState('');
     const [photos, setPhotos] = useState<string[]>([]);
-    const [languages, setLanguages] = useState<string[]>([]);
+    const [languagesSpoken, setLanguagesSpoken] = useState<LanguageWithLevel[]>([]);
+    const [languagesToLearn, setLanguagesToLearn] = useState<LanguageWithLevel[]>([]);
     const [interests, setInterests] = useState<string[]>([]);
     const [location, setLocation] = useState<UserLocation | null>(null);
-
-    const toggleLanguage = (lang: string) => {
-        setLanguages(prev =>
-            prev.includes(lang)
-                ? prev.filter(l => l !== lang)
-                : [...prev, lang]
-        );
-    };
 
     const toggleInterest = (interest: string) => {
         setInterests(prev =>
@@ -85,7 +78,8 @@ export default function CreateProfileScreen() {
                 age: parseInt(age, 10),
                 gender,
                 bio: bio.trim(),
-                languages,
+                languagesSpoken,
+                languagesToLearn,
                 interests,
                 photos, // In production, these would be uploaded to Firebase Storage first
                 role: params.role || 'visitor',
@@ -109,9 +103,10 @@ export default function CreateProfileScreen() {
             case 1: return name.trim().length >= 2 && age && parseInt(age, 10) >= 18 && gender;
             case 2: return bio.trim().length >= 10;
             case 3: return photos.length >= 1;
-            case 4: return languages.length >= 1;
-            case 5: return interests.length >= 1;
-            case 6: return location !== null;
+            case 4: return languagesSpoken.length >= 1;
+            case 5: return languagesToLearn.length >= 1;
+            case 6: return interests.length >= 1;
+            case 7: return location !== null;
             default: return false;
         }
     };
@@ -203,27 +198,36 @@ export default function CreateProfileScreen() {
             case 4:
                 return (
                     <View style={styles.stepContent}>
-                        <Text style={styles.stepTitle}>Languages</Text>
+                        <Text style={styles.stepTitle}>Languages You Speak</Text>
                         <Text style={styles.stepSubtitle}>
-                            Select languages you speak
+                            Add languages you speak and your proficiency level
                         </Text>
-                        <View style={styles.tags}>
-                            {LANGUAGES.map((lang) => (
-                                <TouchableOpacity
-                                    key={lang}
-                                    style={[styles.tag, languages.includes(lang) && styles.tagSelected]}
-                                    onPress={() => toggleLanguage(lang)}
-                                >
-                                    <Text style={[styles.tagText, languages.includes(lang) && styles.tagTextSelected]}>
-                                        {lang}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
+                        <LanguageSelector
+                            selectedLanguages={languagesSpoken}
+                            onLanguagesChange={setLanguagesSpoken}
+                            label="Languages Spoken"
+                            subtitle="Select at least one language"
+                        />
                     </View>
                 );
 
             case 5:
+                return (
+                    <View style={styles.stepContent}>
+                        <Text style={styles.stepTitle}>Languages to Learn</Text>
+                        <Text style={styles.stepSubtitle}>
+                            Add languages you want to learn and your target level
+                        </Text>
+                        <LanguageSelector
+                            selectedLanguages={languagesToLearn}
+                            onLanguagesChange={setLanguagesToLearn}
+                            label="Languages to Learn"
+                            subtitle="Select at least one language"
+                        />
+                    </View>
+                );
+
+            case 6:
                 return (
                     <View style={styles.stepContent}>
                         <Text style={styles.stepTitle}>Interests</Text>
@@ -246,7 +250,7 @@ export default function CreateProfileScreen() {
                     </View>
                 );
 
-            case 6:
+            case 7:
                 return (
                     <View style={styles.stepContent}>
                         <Text style={styles.stepTitle}>Your Location</Text>
@@ -272,7 +276,7 @@ export default function CreateProfileScreen() {
         >
             {/* Progress Bar */}
             <View style={styles.progressContainer}>
-                {[1, 2, 3, 4, 5, 6].map((s) => (
+                {[1, 2, 3, 4, 5, 6, 7].map((s) => (
                     <View
                         key={s}
                         style={[styles.progressStep, s <= step && styles.progressStepActive]}
@@ -297,7 +301,7 @@ export default function CreateProfileScreen() {
                         style={styles.navButton}
                     />
                 )}
-                {step < 6 ? (
+                {step < 7 ? (
                     <Button
                         title="Continue"
                         onPress={() => setStep(step + 1)}

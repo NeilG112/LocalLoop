@@ -78,13 +78,25 @@ export function SwipeCard({ user, distance, hasLikedYou }: SwipeCardProps) {
                 {/* Bio */}
                 <Text style={styles.bio}>{user.bio}</Text>
 
-                {/* Languages */}
-                {user.languages.length > 0 && (
+                {/* Languages Spoken */}
+                {user.languagesSpoken.length > 0 && (
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>🗣️ Languages</Text>
+                        <Text style={styles.sectionTitle}>🗣️ Speaks</Text>
                         <View style={styles.tags}>
-                            {user.languages.map((lang, index) => (
-                                <Badge key={index} label={lang} variant="primary" size="sm" />
+                            {user.languagesSpoken.map((lang, index) => (
+                                <Badge key={index} label={`${lang.language} (${lang.level})`} variant="primary" size="sm" />
+                            ))}
+                        </View>
+                    </View>
+                )}
+
+                {/* Languages to Learn */}
+                {user.languagesToLearn.length > 0 && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>📚 Learning</Text>
+                        <View style={styles.tags}>
+                            {user.languagesToLearn.map((lang, index) => (
+                                <Badge key={index} label={`${lang.language} (${lang.level})`} variant="secondary" size="sm" />
                             ))}
                         </View>
                     </View>

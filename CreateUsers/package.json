@@ -1,0 +1,12 @@
+{
+    "name": "localloop-create-users",
+    "version": "1.0.0",
+    "description": "Script to create test users for LocalLoop",
+    "main": "createUsers.js",
+    "scripts": {
+        "create-users": "node createUsers.js"
+    },
+    "dependencies": {
+        "firebase-admin": "^12.0.0"
+    }
+}

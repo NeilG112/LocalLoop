@@ -16,11 +16,11 @@ import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../src/contexts/AuthContext';
 import { LocationPicker } from '../src/components/LocationPicker';
+import { LanguageSelector } from '../src/components/LanguageSelector';
 import { Button, Input, Badge } from '../src/components/ui';
 import { colors, typography, spacing, borderRadius, shadows } from '../src/config/theme';
-import { Gender, Location as UserLocation } from '../src/types';
+import { Gender, Location as UserLocation, LanguageWithLevel } from '../src/types';
 
-const LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Chinese', 'Japanese', 'Korean', 'Arabic', 'Hindi', 'Russian'];
 const INTERESTS = ['Art', 'Music', 'Food', 'Sports', 'Travel', 'History', 'Nature', 'Photography', 'Movies', 'Tech', 'Fashion', 'Nightlife'];
 
 export default function EditProfileScreen() {
@@ -32,7 +32,8 @@ export default function EditProfileScreen() {
     const [gender, setGender] = useState<Gender | null>(user?.gender || null);
     const [bio, setBio] = useState(user?.bio || '');
     const [photos, setPhotos] = useState<string[]>(user?.photos || []);
-    const [languages, setLanguages] = useState<string[]>(user?.languages || []);
+    const [languagesSpoken, setLanguagesSpoken] = useState<LanguageWithLevel[]>(user?.languagesSpoken || []);
+    const [languagesToLearn, setLanguagesToLearn] = useState<LanguageWithLevel[]>(user?.languagesToLearn || []);
     const [interests, setInterests] = useState<string[]>(user?.interests || []);
     const [location, setLocation] = useState<UserLocation | null>(user?.location || null);
     const [showLocationPicker, setShowLocationPicker] = useState(false);
@@ -46,19 +47,12 @@ export default function EditProfileScreen() {
             setGender(user.gender);
             setBio(user.bio);
             setPhotos(user.photos);
-            setLanguages(user.languages);
+            setLanguagesSpoken(user.languagesSpoken);
+            setLanguagesToLearn(user.languagesToLearn);
             setInterests(user.interests);
             setLocation(user.location);
         }
     }, [user]);
-
-    const toggleLanguage = (lang: string) => {
-        setLanguages(prev =>
-            prev.includes(lang)
-                ? prev.filter(l => l !== lang)
-                : [...prev, lang]
-        );
-    };
 
     const toggleInterest = (interest: string) => {
         setInterests(prev =>
@@ -104,7 +98,8 @@ export default function EditProfileScreen() {
                 gender,
                 bio: bio.trim(),
                 photos,
-                languages,
+                languagesSpoken,
+                languagesToLearn,
                 interests,
                 location,
             });
@@ -248,22 +243,24 @@ export default function EditProfileScreen() {
                     )}
                 </View>
 
-                {/* Languages */}
+                {/* Languages Spoken */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Languages</Text>
-                    <View style={styles.tags}>
-                        {LANGUAGES.map((lang) => (
-                            <TouchableOpacity
-                                key={lang}
-                                style={[styles.tag, languages.includes(lang) && styles.tagSelected]}
-                                onPress={() => toggleLanguage(lang)}
-                            >
-                                <Text style={[styles.tagText, languages.includes(lang) && styles.tagTextSelected]}>
-                                    {lang}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
+                    <LanguageSelector
+                        selectedLanguages={languagesSpoken}
+                        onLanguagesChange={setLanguagesSpoken}
+                        label="Languages You Speak"
+                        subtitle="Add languages you speak with proficiency levels"
+                    />
+                </View>
+
+                {/* Languages to Learn */}
+                <View style={styles.section}>
+                    <LanguageSelector
+                        selectedLanguages={languagesToLearn}
+                        onLanguagesChange={setLanguagesToLearn}
+                        label="Languages to Learn"
+                        subtitle="Add languages you want to learn with target levels"
+                    />
                 </View>
 
                 {/* Interests */}

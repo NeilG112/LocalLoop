@@ -5,6 +5,15 @@ export type UserRole = 'host' | 'visitor';
 export type Gender = 'male' | 'female' | 'other';
 export type GenderPreference = 'any' | 'male' | 'female' | 'other';
 
+// Language proficiency levels (CEFR standard)
+export type LanguageProficiency = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
+
+// Language with proficiency level
+export interface LanguageWithLevel {
+    language: string;
+    level: LanguageProficiency;
+}
+
 // Location types
 export interface Coordinates {
     lat: number;
@@ -38,7 +47,8 @@ export interface User {
     age: number;
     gender: Gender;
     bio: string;
-    languages: string[];
+    languagesSpoken: LanguageWithLevel[];  // Languages user speaks with proficiency
+    languagesToLearn: LanguageWithLevel[]; // Languages user wants to learn with target level
     interests: string[];
     photos: string[];
     role: UserRole;
@@ -57,7 +67,8 @@ export interface CreateUserData {
     age: number;
     gender: Gender;
     bio: string;
-    languages: string[];
+    languagesSpoken: LanguageWithLevel[];
+    languagesToLearn: LanguageWithLevel[];
     interests: string[];
     photos: string[];
     role: UserRole;

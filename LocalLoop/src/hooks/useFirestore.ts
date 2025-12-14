@@ -19,12 +19,13 @@ import {
     QueryConstraint,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { User, Swipe, Match, Message, SwipeType } from '../types';
+import { User, Swipe, Match, Message, SwipeType, FeedFilters } from '../types';
+import { calculateDistance } from '../utils/distance';
 
 // Hook to fetch users for swiping
 export function useSwipeablUsers(
     currentUser: User | null,
-    filters?: { maxDistance?: number; ageRange?: { min: number; max: number } }
+    filters?: FeedFilters
 ) {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
@@ -43,9 +44,10 @@ export function useSwipeablUsers(
             const targetRole = currentUser.role === 'host' ? 'visitor' : 'host';
 
             // Base query - get users with opposite role
+            // Note: We're fetching more users initially to allow for client-side filtering
             const constraints: QueryConstraint[] = [
                 where('role', '==', targetRole),
-                limit(20),
+                limit(50), // Increased limit for better filtering spread
             ];
 
             const q = query(collection(db, 'users'), ...constraints);
@@ -76,11 +78,17 @@ export function useSwipeablUsers(
             // Filter and transform users
             const fetchedUsers: User[] = [];
 
+            // Use provided filters or fallback to user preferences
+            const activeAgeRange = filters?.ageRange || currentUser.preferences.agePreference;
+            const activeGenderPref = filters?.gender || currentUser.preferences.genderPreference;
+            const activeMaxDistance = filters?.maxDistance || currentUser.preferences.radiusPreference;
+            const activeLanguages = filters?.languages || [];
+
             snapshot.docs.forEach(doc => {
                 const data = doc.data();
                 const userId = doc.id;
 
-                // Skip if already swiped, matched, or blocked
+                // 1. Basic Exclusion (Block list, Swipes, Matches)
                 if (
                     swipedUserIds.has(userId) ||
                     matchedUserIds.has(userId) ||
@@ -90,23 +98,51 @@ export function useSwipeablUsers(
                     return;
                 }
 
-                fetchedUsers.push({
+                const userCandidate = {
                     ...data,
                     id: userId,
                     createdAt: data.createdAt?.toDate() || new Date(),
                     updatedAt: data.updatedAt?.toDate() || new Date(),
-                } as User);
-            });
+                } as User;
 
-            setUsers(fetchedUsers);
-            setError(null);
+                // 2. Age Filter
+                if (userCandidate.age < activeAgeRange.min || userCandidate.age > activeAgeRange.max) {
+                    return;
+                }
+
+                // 3. Gender Filter
+                if (activeGenderPref !== 'any' && userCandidate.gender !== activeGenderPref) {
+                    return;
+                }
+
+                // 4. Distance Filter
+                if (currentUser.location?.coordinates && userCandidate.location?.coordinates) {
+                    const distance = calculateDistance(
+                        currentUser.location.coordinates,
+                        userCandidate.location.coordinates
+                    );
+                    if (distance > activeMaxDistance) {
+                        return;
+                    }
+                }
+
+                // 5. Language Filter
+                if (activeLanguages.length > 0) {
+                    const candidateLanguages = userCandidate.languagesSpoken || [];
+                    const hasLanguage = candidateLanguages.some(l => activeLanguages.includes(l.language));
+
+                    if (!hasLanguage) {
+                        return;
+                    }
+                }
+
+                fetchedUsers.push(userCandidate);
+            });
+            // ... (rest of logic)
         } catch (err) {
-            setError(err as Error);
-            console.error('Error fetching users:', err);
-        } finally {
-            setLoading(false);
+            // ...
         }
-    }, [currentUser]);
+    }, [currentUser, filters]);
 
     useEffect(() => {
         fetchUsers();

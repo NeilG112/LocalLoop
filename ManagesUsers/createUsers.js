@@ -144,13 +144,32 @@ async function createUser(role, location, index) {
         console.log(`✓ Created auth user: ${email}`);
 
         // Create Firestore profile
+        const languagesList = ['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Chinese', 'Japanese', 'Korean', 'Arabic', 'Hindi', 'Russian'];
+        const proficiencyLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+
+        // Helper to create language with level
+        const createLanguageWithLevel = (language) => ({
+            language: language,
+            level: getRandom(proficiencyLevels)
+        });
+
+        // Get 2-4 languages spoken
+        const spokenLanguages = getRandomItems(languagesList, Math.floor(Math.random() * 3) + 2);
+        const languagesSpoken = spokenLanguages.map(createLanguageWithLevel);
+
+        // Get 1-3 languages to learn (different from spoken)
+        const remainingLanguages = languagesList.filter(lang => !spokenLanguages.includes(lang));
+        const learningLanguages = getRandomItems(remainingLanguages, Math.floor(Math.random() * 3) + 1);
+        const languagesToLearn = learningLanguages.map(createLanguageWithLevel);
+
         const profileData = {
             email: email,
             name: name,
             age: getRandomAge(),
             gender: getRandom(['male', 'female', 'other']),
             bio: getRandom(BIOS),
-            languages: getRandomItems(LANGUAGES, Math.floor(Math.random() * 3) + 2), // 2-4 languages
+            languagesSpoken: languagesSpoken,
+            languagesToLearn: languagesToLearn,
             interests: getRandomItems(INTERESTS, Math.floor(Math.random() * 4) + 3), // 3-6 interests
             photos: [
                 `https://i.pravatar.cc/400?img=${index}`, // Using placeholder avatar service
@@ -193,18 +212,18 @@ async function createAllUsers() {
     const results = [];
     let userIndex = 1;
 
-    // Create 25 Hosts (12-13 in Germany, 12-13 in China)
+    // Create 5 Hosts (3 in Germany, 2 in China)
     console.log('Creating Hosts...');
-    for (let i = 0; i < 25; i++) {
-        const location = i < 13 ? getRandom(GERMAN_CITIES) : getRandom(CHINESE_CITIES);
+    for (let i = 0; i < 5; i++) {
+        const location = i < 3 ? getRandom(GERMAN_CITIES) : getRandom(CHINESE_CITIES);
         const result = await createUser('host', location, userIndex++);
         results.push(result);
     }
 
     console.log('\nCreating Visitors...');
-    // Create 25 Visitors (12-13 in Germany, 12-13 in China)
-    for (let i = 0; i < 25; i++) {
-        const location = i < 13 ? getRandom(GERMAN_CITIES) : getRandom(CHINESE_CITIES);
+    // Create 5 Visitors (3 in Germany, 2 in China)
+    for (let i = 0; i < 5; i++) {
+        const location = i < 3 ? getRandom(GERMAN_CITIES) : getRandom(CHINESE_CITIES);
         const result = await createUser('visitor', location, userIndex++);
         results.push(result);
     }

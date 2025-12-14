@@ -126,9 +126,14 @@ export default function SettingsScreen() {
 
             {/* Preferences Section */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Discovery Preferences</Text>
+                <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Discovery Preferences</Text>
+                    <TouchableOpacity onPress={() => router.push('/edit-preferences')}>
+                        <Text style={styles.editLink}>Edit</Text>
+                    </TouchableOpacity>
+                </View>
 
-                <TouchableOpacity style={styles.settingRow}>
+                <TouchableOpacity style={styles.settingRow} onPress={() => router.push('/edit-preferences')}>
                     <View style={styles.settingInfo}>
                         <Text style={styles.settingLabel}>Age Range</Text>
                         <Text style={styles.settingValue}>
@@ -138,17 +143,18 @@ export default function SettingsScreen() {
                     <Text style={styles.settingArrow}>›</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.settingRow}>
+                <TouchableOpacity style={styles.settingRow} onPress={() => router.push('/edit-preferences')}>
                     <View style={styles.settingInfo}>
                         <Text style={styles.settingLabel}>Show Me</Text>
                         <Text style={styles.settingValue}>
-                            {user.preferences.genderPreference === 'any' ? 'Everyone' : user.preferences.genderPreference}
+                            {user.preferences.genderPreference === 'any' ? 'Everyone' :
+                                user.preferences.genderPreference.charAt(0).toUpperCase() + user.preferences.genderPreference.slice(1)}
                         </Text>
                     </View>
                     <Text style={styles.settingArrow}>›</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.settingRow}>
+                <TouchableOpacity style={styles.settingRow} onPress={() => router.push('/edit-preferences')}>
                     <View style={styles.settingInfo}>
                         <Text style={styles.settingLabel}>Maximum Distance</Text>
                         <Text style={styles.settingValue}>{user.preferences.radiusPreference}km</Text>
@@ -224,7 +230,17 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         marginBottom: spacing.md,
+    },
+    editLink: {
+        fontSize: typography.fontSize.sm,
+        color: colors.primary,
+        fontWeight: '600',
     },
     roleCard: {
         backgroundColor: colors.white,

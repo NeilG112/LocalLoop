@@ -138,14 +138,34 @@ export function useSwipeablUsers(
 
                 fetchedUsers.push(userCandidate);
             });
-            // ... (rest of logic)
+
+            setUsers(fetchedUsers);
+            setError(null);
         } catch (err) {
-            // ...
+            console.error('Error fetching users:', err);
+            setError(err as Error);
+        } finally {
+            setLoading(false);
         }
     }, [currentUser, filters]);
 
     useEffect(() => {
-        fetchUsers();
+        let mounted = true;
+        const timeoutId = setTimeout(() => {
+            if (loading && mounted) {
+                console.warn('Fetch timed out');
+                setLoading(false);
+            }
+        }, 10000); // 10s timeout
+
+        fetchUsers().then(() => {
+            clearTimeout(timeoutId);
+        });
+
+        return () => {
+            mounted = false;
+            clearTimeout(timeoutId);
+        };
     }, [fetchUsers]);
 
     return { users, loading, error, refetch: fetchUsers };

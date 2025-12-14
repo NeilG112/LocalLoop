@@ -77,6 +77,10 @@ export function ProfileCard({ user, distance, isCurrentUser = false }: ProfileCa
                             <Text style={styles.distance}>• {formatDistance(distance)}</Text>
                         )}
                     </View>
+
+                    {user.durationOfStay && (
+                        <Text style={styles.duration}>🗓️ Staying for: {user.durationOfStay}</Text>
+                    )}
                 </View>
 
                 {/* Bio */}
@@ -99,19 +103,21 @@ export function ProfileCard({ user, distance, isCurrentUser = false }: ProfileCa
                     </View>
                 </View>
 
-                {/* Languages to Learn */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>📚 Languages to Learn</Text>
-                    <View style={styles.tags}>
-                        {user.languagesToLearn.length > 0 ? (
-                            user.languagesToLearn.map((lang, index) => (
-                                <Badge key={index} label={`${lang.language} (${lang.level})`} variant="secondary" />
-                            ))
-                        ) : (
-                            <Text style={styles.empty}>No languages specified</Text>
-                        )}
+                {/* Languages to Learn - Host Only or if populated */}
+                {(user.role === 'host' || (user.languagesToLearn && user.languagesToLearn.length > 0)) && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>📚 Languages to Learn</Text>
+                        <View style={styles.tags}>
+                            {user.languagesToLearn && user.languagesToLearn.length > 0 ? (
+                                user.languagesToLearn.map((lang, index) => (
+                                    <Badge key={index} label={`${lang.language} (${lang.level})`} variant="secondary" />
+                                ))
+                            ) : (
+                                <Text style={styles.empty}>No languages specified</Text>
+                            )}
+                        </View>
                     </View>
-                </View>
+                )}
 
                 {/* Interests */}
                 <View style={styles.section}>
@@ -230,6 +236,12 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.sm,
         color: colors.textMuted,
         fontStyle: 'italic',
+    },
+    duration: {
+        fontSize: typography.fontSize.sm,
+        color: colors.primary,
+        marginTop: spacing.xs,
+        fontWeight: '500',
     },
 });
 

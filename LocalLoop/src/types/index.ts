@@ -48,7 +48,7 @@ export interface User {
     gender: Gender;
     bio: string;
     languagesSpoken: LanguageWithLevel[];  // Languages user speaks with proficiency
-    languagesToLearn: LanguageWithLevel[]; // Languages user wants to learn with target level
+    languagesToLearn?: LanguageWithLevel[]; // Languages user wants to learn (optional for visitors)
     interests: string[];
     photos: string[];
     role: UserRole;
@@ -56,6 +56,7 @@ export interface User {
     preferences: UserPreferences;
     blockedUsers: string[];
     pushToken?: string;
+    durationOfStay?: string; // Only for visitors
     createdAt: Date;
     updatedAt: Date;
 }
@@ -68,12 +69,13 @@ export interface CreateUserData {
     gender: Gender;
     bio: string;
     languagesSpoken: LanguageWithLevel[];
-    languagesToLearn: LanguageWithLevel[];
+    languagesToLearn?: LanguageWithLevel[];
     interests: string[];
     photos: string[];
     role: UserRole;
     location: Location;
     preferences: UserPreferences;
+    durationOfStay?: string;
 }
 
 // Swipe types

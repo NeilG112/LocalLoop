@@ -124,10 +124,10 @@ export default function SettingsScreen() {
                 </View>
             </View>
 
-            {/* Preferences Section */}
+            {/* Discovery Settings Section */}
             <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Discovery Preferences</Text>
+                    <Text style={styles.sectionTitle}>Discovery Settings</Text>
                     <TouchableOpacity onPress={() => router.push('/edit-preferences')}>
                         <Text style={styles.editLink}>Edit</Text>
                     </TouchableOpacity>

@@ -38,6 +38,9 @@ export default function CreateProfileScreen() {
     const [languagesToLearn, setLanguagesToLearn] = useState<LanguageWithLevel[]>([]);
     const [interests, setInterests] = useState<string[]>([]);
     const [location, setLocation] = useState<UserLocation | null>(null);
+    const [durationOfStay, setDurationOfStay] = useState('');
+
+    const isHost = params.role === 'host';
 
     const toggleInterest = (interest: string) => {
         setInterests(prev =>
@@ -79,11 +82,12 @@ export default function CreateProfileScreen() {
                 gender,
                 bio: bio.trim(),
                 languagesSpoken,
-                languagesToLearn,
+                languagesToLearn: isHost ? languagesToLearn : [],
                 interests,
                 photos, // In production, these would be uploaded to Firebase Storage first
                 role: params.role || 'visitor',
                 location,
+                durationOfStay: !isHost ? durationOfStay : undefined,
                 preferences: {
                     radiusPreference: 50,
                     genderPreference: 'any',
@@ -104,7 +108,7 @@ export default function CreateProfileScreen() {
             case 2: return bio.trim().length >= 10;
             case 3: return photos.length >= 1;
             case 4: return languagesSpoken.length >= 1;
-            case 5: return languagesToLearn.length >= 1;
+            case 5: return isHost ? languagesToLearn.length >= 1 : durationOfStay.length >= 2;
             case 6: return interests.length >= 1;
             case 7: return location !== null;
             default: return false;
@@ -212,20 +216,37 @@ export default function CreateProfileScreen() {
                 );
 
             case 5:
-                return (
-                    <View style={styles.stepContent}>
-                        <Text style={styles.stepTitle}>Languages to Learn</Text>
-                        <Text style={styles.stepSubtitle}>
-                            Add languages you want to learn and your target level
-                        </Text>
-                        <LanguageSelector
-                            selectedLanguages={languagesToLearn}
-                            onLanguagesChange={setLanguagesToLearn}
-                            label="Languages to Learn"
-                            subtitle="Select at least one language"
-                        />
-                    </View>
-                );
+                if (isHost) {
+                    return (
+                        <View style={styles.stepContent}>
+                            <Text style={styles.stepTitle}>Languages to Learn</Text>
+                            <Text style={styles.stepSubtitle}>
+                                Add languages you want to learn and your target level
+                            </Text>
+                            <LanguageSelector
+                                selectedLanguages={languagesToLearn}
+                                onLanguagesChange={setLanguagesToLearn}
+                                label="Languages to Learn"
+                                subtitle="Select at least one language"
+                            />
+                        </View>
+                    );
+                } else {
+                    return (
+                        <View style={styles.stepContent}>
+                            <Text style={styles.stepTitle}>How long are you staying?</Text>
+                            <Text style={styles.stepSubtitle}>
+                                Let locals know how long you'll be around
+                            </Text>
+                            <Input
+                                label="Duration of Stay"
+                                placeholder="e.g. 2 weeks, 3 days, Just visiting..."
+                                value={durationOfStay}
+                                onChangeText={setDurationOfStay}
+                            />
+                        </View>
+                    );
+                }
 
             case 6:
                 return (

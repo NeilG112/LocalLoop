@@ -27,8 +27,12 @@ export function FilterModal({ visible, onClose, onApply, currentFilters }: Filte
     const [ageMin, setAgeMin] = useState(currentFilters.ageRange.min);
     const [ageMax, setAgeMax] = useState(currentFilters.ageRange.max);
     const [distance, setDistance] = useState(currentFilters.maxDistance);
+
     const [gender, setGender] = useState<GenderPreference>(currentFilters.gender);
     const [selectedLanguages, setSelectedLanguages] = useState<string[]>(currentFilters.languages || []);
+    const [selectedInterests, setSelectedInterests] = useState<string[]>(currentFilters.interests || []);
+
+    const INTERESTS_LIST = ['Art', 'Music', 'Food', 'Sports', 'Travel', 'History', 'Nature', 'Photography', 'Movies', 'Tech', 'Fashion', 'Nightlife'];
 
     // Reset state when modal opens
     useEffect(() => {
@@ -38,6 +42,7 @@ export function FilterModal({ visible, onClose, onApply, currentFilters }: Filte
             setDistance(currentFilters.maxDistance);
             setGender(currentFilters.gender);
             setSelectedLanguages(currentFilters.languages || []);
+            setSelectedInterests(currentFilters.interests || []);
         }
     }, [visible, currentFilters]);
 
@@ -47,6 +52,7 @@ export function FilterModal({ visible, onClose, onApply, currentFilters }: Filte
             maxDistance: distance,
             gender: gender,
             languages: selectedLanguages,
+            interests: selectedInterests,
         });
         onClose();
     };
@@ -56,6 +62,14 @@ export function FilterModal({ visible, onClose, onApply, currentFilters }: Filte
             prev.includes(lang)
                 ? prev.filter(l => l !== lang)
                 : [...prev, lang]
+        );
+    };
+
+    const toggleInterest = (interest: string) => {
+        setSelectedInterests(prev =>
+            prev.includes(interest)
+                ? prev.filter(i => i !== interest)
+                : [...prev, interest]
         );
     };
 
@@ -96,6 +110,7 @@ export function FilterModal({ visible, onClose, onApply, currentFilters }: Filte
                         setDistance(100);
                         setGender('any');
                         setSelectedLanguages([]);
+                        setSelectedInterests([]);
                     }}>
                         <Text style={styles.resetText}>Reset</Text>
                     </TouchableOpacity>
@@ -194,6 +209,31 @@ export function FilterModal({ visible, onClose, onApply, currentFilters }: Filte
                                         selectedLanguages.includes(lang) && styles.tagTextSelected
                                     ]}>
                                         {lang}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+
+                    {/* Interests Section */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Interests</Text>
+                        <Text style={styles.sectionSubtitle}>Show people interested in:</Text>
+                        <View style={styles.tags}>
+                            {INTERESTS_LIST.map((interest) => (
+                                <TouchableOpacity
+                                    key={interest}
+                                    style={[
+                                        styles.tag,
+                                        selectedInterests.includes(interest) && styles.tagSelected
+                                    ]}
+                                    onPress={() => toggleInterest(interest)}
+                                >
+                                    <Text style={[
+                                        styles.tagText,
+                                        selectedInterests.includes(interest) && styles.tagTextSelected
+                                    ]}>
+                                        {interest}
                                     </Text>
                                 </TouchableOpacity>
                             ))}

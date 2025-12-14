@@ -11,6 +11,7 @@ import {
     Animated,
     PanResponder,
     Alert,
+    Modal,
 } from 'react-native';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useSwipeablUsers, useSwipes } from '../../src/hooks/useFirestore';
@@ -19,13 +20,16 @@ import { calculateDistance } from '../../src/utils/distance';
 import { colors, typography, spacing, borderRadius, shadows } from '../../src/config/theme';
 import { User, FeedFilters } from '../../src/types';
 import { FilterModal } from '../../src/components/FilterModal';
+import { ProfileCard } from '../../src/components/ProfileCard';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
+const SWIPE_UP_THRESHOLD = 50;
 
 export default function HomeScreen() {
     const { user } = useAuth();
     const [filterModalVisible, setFilterModalVisible] = useState(false);
+    const [detailsVisible, setDetailsVisible] = useState(false);
     const [activeFilters, setActiveFilters] = useState<FeedFilters | undefined>(undefined);
 
     // Initial load of filters from user preferences
@@ -78,6 +82,9 @@ export default function HomeScreen() {
                     swipeRight();
                 } else if (gesture.dx < -SWIPE_THRESHOLD) {
                     swipeLeft();
+                } else if (gesture.dy < -SWIPE_UP_THRESHOLD) {
+                    setDetailsVisible(true);
+                    resetPosition();
                 } else {
                     resetPosition();
                 }
@@ -207,9 +214,33 @@ export default function HomeScreen() {
                     style={styles.filterButton}
                     onPress={() => setFilterModalVisible(true)}
                 >
-                    <Text style={styles.filterButtonText}>⚙️</Text>
+                    <Text style={styles.filterButtonText}>Filters ⚙️</Text>
                 </TouchableOpacity>
             </View>
+
+            {/* Details Modal */}
+            <Modal
+                visible={detailsVisible}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setDetailsVisible(false)}
+            >
+                {currentUser && (
+                    <View style={{ flex: 1, backgroundColor: colors.background }}>
+                        <ProfileCard
+                            user={currentUser}
+                            distance={distance}
+                            isCurrentUser={false}
+                        />
+                        <TouchableOpacity
+                            style={styles.closeDetailsButton}
+                            onPress={() => setDetailsVisible(false)}
+                        >
+                            <Text style={styles.closeDetailsText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </Modal>
 
             {/* Filter Modal */}
             {activeFilters && (
@@ -429,16 +460,33 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     filterButton: {
-        width: 44,
-        height: 44,
-        justifyContent: 'center',
+        flexDirection: 'row',
         alignItems: 'center',
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.sm,
         backgroundColor: colors.white,
         borderRadius: borderRadius.full,
         ...shadows.sm,
     },
     filterButtonText: {
-        fontSize: 24,
+        fontSize: typography.fontSize.sm,
+        fontWeight: '600',
+        color: colors.textPrimary,
+    },
+    closeDetailsButton: {
+        position: 'absolute',
+        top: spacing.xl,
+        right: spacing.xl,
+        backgroundColor: colors.white,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.sm,
+        borderRadius: borderRadius.full,
+        ...shadows.md,
+    },
+    closeDetailsText: {
+        fontSize: typography.fontSize.sm,
+        fontWeight: 'bold',
+        color: colors.textPrimary,
     },
     emptyActions: {
         gap: spacing.md,

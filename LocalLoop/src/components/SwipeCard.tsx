@@ -91,11 +91,11 @@ export function SwipeCard({ user, distance, hasLikedYou }: SwipeCardProps) {
                 )}
 
                 {/* Languages to Learn */}
-                {user.languagesToLearn.length > 0 && (
+                {user.languagesToLearn && user.languagesToLearn.length > 0 && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>📚 Learning</Text>
                         <View style={styles.tags}>
-                            {user.languagesToLearn.map((lang, index) => (
+                            {user.languagesToLearn?.map((lang, index) => (
                                 <Badge key={index} label={`${lang.language} (${lang.level})`} variant="secondary" size="sm" />
                             ))}
                         </View>
@@ -113,6 +113,11 @@ export function SwipeCard({ user, distance, hasLikedYou }: SwipeCardProps) {
                         </View>
                     </View>
                 )}
+
+                {/* Swipe Up Indicator */}
+                <View style={styles.swipeUpContainer}>
+                    <Text style={styles.swipeUpText}>⌃ Swipe up for details</Text>
+                </View>
             </ScrollView>
         </View>
     );
@@ -221,6 +226,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: spacing.xs,
+    },
+    swipeUpContainer: {
+        alignItems: 'center',
+        paddingVertical: spacing.md,
+        opacity: 0.6,
+    },
+    swipeUpText: {
+        fontSize: typography.fontSize.sm,
+        color: colors.textSecondary,
+        fontWeight: '500',
     },
 });
 
